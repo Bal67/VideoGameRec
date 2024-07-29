@@ -34,10 +34,9 @@ def extract_features(df):
     
     # Convert game titles to lowercase
     df['game_title'] = df['game_title'].str.lower()
-    
-    # Display the first few rows of the dataset to verify
-    print("First few rows of the dataset after renaming columns and converting titles to lowercase:")
-    print(df.head())
+
+    # Drop the flag column
+    df = df.drop(columns=['flag'])
     
     return df
 
