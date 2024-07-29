@@ -29,12 +29,15 @@ def extract_features(df):
     Returns:
         pd.DataFrame: The dataset with extracted features.
     """
-    # Display the first few rows of the dataset to verify
-    print("First few rows of the dataset:")
-    print(df.head())
+    # Rename columns for clarity
+    df.columns = ['user_id', 'game_title', 'action', 'hours', 'flag']
     
-    # Extract the relevant features
-    df['title'] = df['title'].str.lower()
+    # Convert game titles to lowercase
+    df['game_title'] = df['game_title'].str.lower()
+    
+    # Display the first few rows of the dataset to verify
+    print("First few rows of the dataset after renaming columns and converting titles to lowercase:")
+    print(df.head())
     
     return df
 
@@ -50,4 +53,3 @@ if __name__ == "__main__":
     # Display the first few rows of the modified dataset
     print("Dataset after feature extraction:")
     print(df.head())
-
