@@ -34,7 +34,6 @@ def recommend_games(game_title, item_similarity_df):
     return top_games
 
 # Streamlit app
-# Streamlit app
 def main():
     st.set_page_config(page_title="Game Recommendation System", page_icon="🎮")
     
@@ -74,8 +73,19 @@ def main():
         
         .recommendation-item {
             font-size: 1.5em;
-            margin: 5px 0;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0px 0px 15px 5px rgba(255, 105, 180, 0.6);
             color: #ffffff;
+            animation: glow 1.5s infinite;
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0px 0px 10px 2px rgba(255, 105, 180, 0.6); }
+            50% { box-shadow: 0px 0px 20px 10px rgba(255, 255, 255, 0.8); }
+            100% { box-shadow: 0px 0px 10px 2px rgba(255, 105, 180, 0.6); }
         }
         
         .stButton>button {
