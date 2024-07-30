@@ -15,6 +15,12 @@ def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
     return df
 
+def check_columns(df):
+    """
+    Check the columns in the dataframe and print them.
+    """
+    print(f"Columns in the dataset: {df.columns.tolist()}")
+
 def prepare_data_for_knn(df):
     """
     Prepare the data for training the KNN model.
@@ -27,13 +33,17 @@ def prepare_data_for_knn(df):
         list: List of user IDs.
         list: List of game titles.
     """
-    user_game_matrix = df.pivot(index='user_id', columns='game_title', values='rating').fillna(0)
+    try:
+        user_game_matrix = df.pivot(index='user_id', columns='game_title', values='rating').fillna(0)
+    except KeyError as e:
+        check_columns(df)
+        raise e
+
     user_ids = list(user_game_matrix.index)
     game_titles = list(user_game_matrix.columns)
     user_game_matrix_csr = csr_matrix(user_game_matrix.values)
     
     return user_game_matrix_csr, user_ids, game_titles
-
 
 # Base model created using KNN
 def train_base_model(user_game_matrix_csr):
@@ -42,12 +52,14 @@ def train_base_model(user_game_matrix_csr):
     return knn
 
 def prepare_data_for_nn(df):
-    user_ids = df['user_id'].astype('category').cat.codes.values
-    game_ids = df['game_title'].astype('category').cat.codes.values
-    ratings = df['rating'].values
+    try:
+        user_ids = df['user_id'].astype('category').cat.codes.values
+        game_ids = df['game_title'].astype('category').cat.codes.values
+        ratings = df['rating'].values
+    except KeyError as e:
+        check_columns(df)
+        raise e
     return user_ids, game_ids, ratings
-
-
 
 # Naive model created using neural Collaborative Filtering
 def build_naive_model(num_users, num_games, embedding_size=50):
@@ -93,7 +105,6 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     
     return model
 
-
 # Save model to desired path
 def save_model(model, model_name, model_path='./models'):
     if not os.path.exists(model_path):
@@ -109,13 +120,14 @@ def save_model(model, model_name, model_path='./models'):
         
     print(f"Model saved to {model_file}")
 
-
-
 if __name__ == "__main__":
     dataset_path = './datasets/steam/steam-200k.csv'
     
     # Load the data
     df = load_data(dataset_path)
+    
+    # Check the columns to ensure they are as expected
+    check_columns(df)
     
     # Prepare data for base model
     user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
@@ -132,7 +144,6 @@ if __name__ == "__main__":
     user_ids_train, user_ids_test, game_ids_train, game_ids_test, ratings_train, ratings_test = train_test_split(
         user_ids, game_ids, ratings, test_size=0.2, random_state=42
     )
-    
     
     # Train naive model
     print("Training naive model (Basic Neural Collaborative Filtering)...")
