@@ -15,16 +15,18 @@ def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
     return df
 
-#Check to see which columns are in the dataset
-def check_columns(df):
-    print(f"Columns in the dataset: {df.columns.tolist()}")
-
-# Prepare data for KNN Base model
 def prepare_data_for_knn(df):
     try:
+        # Aggregate ratings by taking the mean for each user-game combination
+        df = df.groupby(['user_id', 'game_title']).rating.mean().reset_index()
+
         user_game_matrix = df.pivot(index='user_id', columns='game_title', values='rating').fillna(0)
     except KeyError as e:
         print(f"Columns in the dataset: {df.columns.tolist()}")
+        raise e
+    except ValueError as e:
+        print(f"ValueError: {e}")
+        print(f"Data causing the issue: {df.head()}")
         raise e
 
     user_ids = list(user_game_matrix.index)
@@ -109,7 +111,7 @@ def save_model(model, model_name, model_path='./models'):
     print(f"Model saved to {model_file}")
 
 if __name__ == "__main__":
-    dataset_path = './data/processed_data.csv'
+    dataset_path = './datasets/steam/processed_data.csv'
     
     # Load the data
     df = load_data(dataset_path)
