@@ -98,6 +98,13 @@ if __name__ == "__main__":
     # Extract features
     df = extract_features(df)
     
+     # Save processed dataset
+    processed_data_path = './data/processed_data.csv'
+    df.to_csv(processed_data_path, index=False)
+    
+    # Display the first few rows of the modified dataset
+    print(f"Processed dataset saved to {processed_data_path}")
+
     # Display the first few rows of the modified dataset
     print("Dataset after feature extraction:")
     print(df.head())

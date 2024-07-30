@@ -15,28 +15,16 @@ def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
     return df
 
+#Check to see which columns are in the dataset
 def check_columns(df):
-    """
-    Check the columns in the dataframe and print them.
-    """
     print(f"Columns in the dataset: {df.columns.tolist()}")
 
+# Prepare data for KNN Base model
 def prepare_data_for_knn(df):
-    """
-    Prepare the data for training the KNN model.
-    
-    Args:
-        df (pd.DataFrame): Dataframe containing user-item interactions and ratings.
-    
-    Returns:
-        csr_matrix: User-item interaction matrix in CSR format.
-        list: List of user IDs.
-        list: List of game titles.
-    """
     try:
         user_game_matrix = df.pivot(index='user_id', columns='game_title', values='rating').fillna(0)
     except KeyError as e:
-        check_columns(df)
+        print(f"Columns in the dataset: {df.columns.tolist()}")
         raise e
 
     user_ids = list(user_game_matrix.index)
@@ -57,7 +45,7 @@ def prepare_data_for_nn(df):
         game_ids = df['game_title'].astype('category').cat.codes.values
         ratings = df['rating'].values
     except KeyError as e:
-        check_columns(df)
+        print(f"Columns in the dataset: {df.columns.tolist()}")
         raise e
     return user_ids, game_ids, ratings
 
@@ -121,13 +109,10 @@ def save_model(model, model_name, model_path='./models'):
     print(f"Model saved to {model_file}")
 
 if __name__ == "__main__":
-    dataset_path = './datasets/steam/steam-200k.csv'
+    dataset_path = './datasets/steam/processed_data.csv'
     
     # Load the data
     df = load_data(dataset_path)
-    
-    # Check the columns to ensure they are as expected
-    check_columns(df)
     
     # Prepare data for base model
     user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
