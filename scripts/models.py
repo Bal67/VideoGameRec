@@ -104,9 +104,11 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     output = Dense(1, activation='linear')(dropout_2)
     
     model = Model(inputs=[user_input, game_input], outputs=output)
-    model.compile(optimizer=Adam(lr=0.001), loss='mse')
+    model.compile(optimizer=Adam(lr=0.0001), loss='mse')
     
     return model
+
+
 
 # Save model to desired path
 def save_model(model, model_name, model_path='./models'):
@@ -147,21 +149,12 @@ def evaluate_knn_model(knn, user_game_matrix_csr, test_data):
     return calculate_rmse(true_ratings, np.array(predicted_ratings))
 
 def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
-    """
-    Evaluate the neural network model.
-    
-    Args:
-        model (Model): Trained neural network model.
-        user_ids_test (np.array): Test user IDs.
-        game_ids_test (np.array): Test game IDs.
-        ratings_test (np.array): True ratings.
-    
-    Returns:
-        float: RMSE value.
-    """
     predictions = model.predict([user_ids_test, game_ids_test]).flatten()
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
+
+
+
 
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
@@ -212,7 +205,7 @@ if __name__ == "__main__":
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
     early_stopping = EarlyStopping(monitor='val_loss', patience=3)
     
-    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=15, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test), callbacks=[early_stopping])
+    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test), callbacks=[early_stopping])
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
     # Evaluate fine-tuned model
