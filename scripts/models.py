@@ -153,15 +153,6 @@ def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
 
-# Save embeddings
-def save_embeddings(model, model_path='./models'):
-    user_embedding_matrix = model.get_layer('user_embedding').get_weights()[0]
-    game_embedding_matrix = model.get_layer('game_embedding').get_weights()[0]
-
-    np.save(os.path.join(model_path, 'user_embeddings.npy'), user_embedding_matrix)
-    np.save(os.path.join(model_path, 'game_embeddings.npy'), game_embedding_matrix)
-
-    print(f"Embeddings saved to {model_path}")
 
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'

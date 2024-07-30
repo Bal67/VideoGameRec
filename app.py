@@ -13,17 +13,17 @@ def load_data(dataset_path):
     df['user_id'] = df['user_id'].astype('category').cat.codes  # Ensure user_id is a category
     return df
 
-# Load embeddings
-def load_embeddings(model_path='./models'):
-    game_embeddings = np.load(os.path.join(model_path, 'game_embeddings.npy'))
-    return game_embeddings
-
 # Recommend top games based on embeddings
-def recommend_games_embedding(game_title, df, game_embeddings):
+def recommend_games_embedding(game_title, df, model):
+    game_ids = df['game_id'].values
+    unique_game_ids = np.unique(game_ids)
+    
     game_id = df[df['game_title'] == game_title]['game_id'].values[0]
-    game_embedding = game_embeddings[game_id]
+    game_embedding_layer = model.get_layer('game_embedding')
+    game_embedding_weights = game_embedding_layer.get_weights()[0]
+    game_embedding = game_embedding_weights[game_id]
 
-    similarities = cosine_similarity([game_embedding], game_embeddings)[0]
+    similarities = cosine_similarity([game_embedding], game_embedding_weights)[0]
     similar_game_indices = similarities.argsort()[-11:][::-1]  # Get top 10 similar games
 
     top_game_ids = [idx for idx in similar_game_indices if idx != game_id]
@@ -102,16 +102,16 @@ def main():
     st.markdown("<h1 class='stTitle'>🌟 Game Recommendation System 🌟</h1>", unsafe_allow_html=True)
 
     dataset_path = './data/processed_data.csv'
-    model_path = './models'
+    model_path = './models/fine_tuned_model.h5'
 
     df = load_data(dataset_path)
-    game_embeddings = load_embeddings(model_path)
+    model = load_model(model_path)
 
     game_title = st.selectbox("Select your favorite game", df['game_title'].unique())
 
     if st.button("Get Recommendations"):
         st.markdown("<div class='stSubtitle'>🌟 Recommendations from Fine-Tuned Neural Network Model 🌟</div>", unsafe_allow_html=True)
-        recommendations = recommend_games_embedding(game_title, df, game_embeddings)
+        recommendations = recommend_games_embedding(game_title, df, model)
         for game in recommendations:
             st.markdown(f"<div class='recommendation-item'>{game}</div>", unsafe_allow_html=True)
 
