@@ -67,7 +67,7 @@ def extract_features(df):
     df['rating'] = np.select(condition, values)
     
     # Drop the unnecessary columns
-    df = df.drop(columns=['flag', 'hours'])
+    df = df.drop(columns=['flag', 'avg_hourplayed'])
 
     return df
 
