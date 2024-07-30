@@ -34,10 +34,11 @@ def recommend_games(game_title, item_similarity_df):
     return top_games
 
 # Streamlit app
+# Streamlit app
 def main():
     st.set_page_config(page_title="Game Recommendation System", page_icon="🎮")
     
-    # Custom CSS for a more extravagant look
+    # Custom CSS for an extravagant look
     st.markdown(
         """
         <style>
@@ -52,7 +53,7 @@ def main():
         
         .stTitle {
             text-align: center;
-            color: #ff1493;
+            color: #ffffff;
             font-size: 3em;
             text-shadow: 2px 2px #000000;
         }
@@ -61,20 +62,20 @@ def main():
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             padding: 10px;
-            box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 0px 15px 5px rgba(255, 105, 180, 0.6);
             animation: sparkle 1s infinite;
         }
         
         @keyframes sparkle {
-            0% { box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.2); }
-            50% { box-shadow: 0px 0px 25px 10px rgba(255, 255, 255, 0.6); }
-            100% { box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.2); }
+            0% { box-shadow: 0px 0px 15px 5px rgba(255, 105, 180, 0.6); }
+            50% { box-shadow: 0px 0px 25px 10px rgba(255, 255, 255, 0.8); }
+            100% { box-shadow: 0px 0px 15px 5px rgba(255, 105, 180, 0.6); }
         }
         
         .recommendation-item {
             font-size: 1.5em;
             margin: 5px 0;
-            color: #ffd700;
+            color: #ffffff;
         }
         
         .stButton>button {
