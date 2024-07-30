@@ -9,6 +9,7 @@ from scipy.sparse import csr_matrix
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.regularizers import l2
 from math import sqrt
 
 # Load Dataset
@@ -84,26 +85,26 @@ def build_naive_model(num_users, num_games, embedding_size=50):
     return model
 
 # Fine-tuned Naive Model
-def build_fine_tuned_model(num_users, num_games, embedding_size=50):
+def build_fine_tuned_model(num_users, num_games, embedding_size=100):
     user_input = Input(shape=(1,))
     game_input = Input(shape=(1,))
     
-    user_embedding = Embedding(num_users, embedding_size, embeddings_regularizer='l2')(user_input)
-    game_embedding = Embedding(num_games, embedding_size, embeddings_regularizer='l2')(game_input)
+    user_embedding = Embedding(num_users, embedding_size, embeddings_regularizer=l2(1e-6))(user_input)
+    game_embedding = Embedding(num_games, embedding_size, embeddings_regularizer=l2(1e-6))(game_input)
     
     user_vector = Flatten()(user_embedding)
     game_vector = Flatten()(game_embedding)
     
     dot_product = Dot(axes=1)([user_vector, game_vector])
     
-    dense_1 = Dense(512, activation='relu', kernel_regularizer='l2')(dot_product)
-    dropout_1 = Dropout(0.5)(dense_1)
-    dense_2 = Dense(256, activation='relu', kernel_regularizer='l2')(dropout_1)
-    dropout_2 = Dropout(0.5)(dense_2)
-    dense_3 = Dense(128, activation='relu', kernel_regularizer='l2')(dropout_2)
-    dropout_3 = Dropout(0.5)(dense_3)
-    dense_4 = Dense(64, activation='relu', kernel_regularizer='l2')(dropout_3)
-    dropout_4 = Dropout(0.5)(dense_4)
+    dense_1 = Dense(512, activation='relu', kernel_regularizer=l2(1e-6))(dot_product)
+    dropout_1 = Dropout(0.4)(dense_1)
+    dense_2 = Dense(256, activation='relu', kernel_regularizer=l2(1e-6))(dropout_1)
+    dropout_2 = Dropout(0.4)(dense_2)
+    dense_3 = Dense(128, activation='relu', kernel_regularizer=l2(1e-6))(dropout_2)
+    dropout_3 = Dropout(0.4)(dense_3)
+    dense_4 = Dense(64, activation='relu', kernel_regularizer=l2(1e-6))(dropout_3)
+    dropout_4 = Dropout(0.4)(dense_4)
     output = Dense(1, activation='linear')(dropout_4)
     
     model = Model(inputs=[user_input, game_input], outputs=output)
@@ -191,7 +192,7 @@ if __name__ == "__main__":
     print("Training fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
     
-    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test))
+    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=30, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test))
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
