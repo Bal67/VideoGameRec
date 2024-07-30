@@ -4,11 +4,13 @@ import numpy as np
 import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
+from sklearn.metrics import mean_squared_error
 from scipy.sparse import csr_matrix
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
+from math import sqrt
 
 # Load Dataset
 def load_data(dataset_path):
@@ -16,6 +18,17 @@ def load_data(dataset_path):
     return df
 
 def prepare_data_for_knn(df):
+    """
+    Prepare the data for training the KNN model.
+    
+    Args:
+        df (pd.DataFrame): Dataframe containing user-item interactions and ratings.
+    
+    Returns:
+        csr_matrix: User-item interaction matrix in CSR format.
+        list: List of user IDs.
+        list: List of game titles.
+    """
     try:
         # Aggregate ratings by taking the mean for each user-game combination
         df = df.groupby(['user_id', 'game_title']).rating.mean().reset_index()
@@ -110,6 +123,52 @@ def save_model(model, model_name, model_path='./models'):
         
     print(f"Model saved to {model_file}")
 
+def calculate_rmse(y_true, y_pred):
+    """
+    Calculate the Root Mean Squared Error (RMSE).
+    
+    Args:
+        y_true (np.array): True ratings.
+        y_pred (np.array): Predicted ratings.
+    
+    Returns:
+        float: RMSE value.
+    """
+    return sqrt(mean_squared_error(y_true, y_pred))
+
+def evaluate_knn_model(knn, user_game_matrix_csr, test_data):
+    """
+    Evaluate the KNN model.
+    
+    Args:
+        knn (NearestNeighbors): Trained KNN model.
+        user_game_matrix_csr (csr_matrix): User-item interaction matrix in CSR format.
+        test_data (pd.DataFrame): Test data containing user_id, game_title, and rating.
+    
+    Returns:
+        float: RMSE value.
+    """
+    test_data = test_data.copy()
+    test_data['user_idx'] = test_data['user_id'].astype('category').cat.codes
+    test_data['game_idx'] = test_data['game_title'].astype('category').cat.codes
+    
+    user_indices = test_data['user_idx'].values
+    game_indices = test_data['game_idx'].values
+    true_ratings = test_data['rating'].values
+    
+    # Predict ratings
+    distances, indices = knn.kneighbors(user_game_matrix_csr[user_indices])
+    predicted_ratings = []
+    for i in range(len(user_indices)):
+        neighbors = indices[i]
+        neighbor_ratings = user_game_matrix_csr[neighbors, game_indices[i]].toarray().flatten()
+        predicted_rating = neighbor_ratings.mean()
+        predicted_ratings.append(predicted_rating)
+    
+    return calculate_rmse(true_ratings, np.array(predicted_ratings))
+
+
+
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
     
@@ -119,10 +178,18 @@ if __name__ == "__main__":
     # Prepare data for base model
     user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
     
+    # Split the data into training and test sets
+    train_data, test_data = train_test_split(df, test_size=0.2, random_state=42)
+    
     # Train base model
     print("Training base model (KNN)...")
     base_model = train_base_model(user_game_matrix_csr)
     save_model(base_model, 'base_model_knn.pkl')
+    
+    # Evaluate base model
+    print("Evaluating base model (KNN)...")
+    knn_rmse = evaluate_knn_model(base_model, user_game_matrix_csr, test_data)
+    print(f"KNN Model RMSE: {knn_rmse}")
     
     # Prepare data for neural network models
     user_ids, game_ids, ratings = prepare_data_for_nn(df)
@@ -141,6 +208,11 @@ if __name__ == "__main__":
     naive_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=5, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test))
     save_model(naive_model, 'naive_model.h5')
     
+    # Evaluate naive model
+    naive_predictions = naive_model.predict([user_ids_test, game_ids_test]).flatten()
+    naive_rmse = calculate_rmse(ratings_test, naive_predictions)
+    print(f"Naive Neural Collaborative Filtering Model RMSE: {naive_rmse}")
+    
     # Train fine-tuned model
     print("Training fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
@@ -148,3 +220,6 @@ if __name__ == "__main__":
     
     fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test), callbacks=[early_stopping])
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
+    
+    # Evaluate fine-tuned model
+    fine_tuned_predictions = fine_tuned_model.predict([user_ids_test, game_ids_test])
