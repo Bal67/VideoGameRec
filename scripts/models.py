@@ -7,7 +7,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics import mean_squared_error
 from scipy.sparse import csr_matrix
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Dropout
+from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Dropout, Concatenate
 from tensorflow.keras.optimizers import Adam
 from math import sqrt
 
@@ -47,21 +47,17 @@ def prepare_data_for_knn(df):
     
     return user_game_matrix_csr, user_ids, game_titles
 
+def prepare_data_for_nn(df):
+    user_ids = df['user_id'].astype('category').cat.codes.values
+    game_ids = df['game_title'].astype('category').cat.codes.values
+    ratings = df['rating'].values
+    return user_ids, game_ids, ratings
+
 # Base model created using KNN
 def train_base_model(user_game_matrix_csr):
     knn = NearestNeighbors(metric='cosine', algorithm='brute')
     knn.fit(user_game_matrix_csr)
     return knn
-
-def prepare_data_for_nn(df):
-    try:
-        user_ids = df['user_id'].astype('category').cat.codes.values
-        game_ids = df['game_title'].astype('category').cat.codes.values
-        ratings = df['rating'].values
-    except KeyError as e:
-        print(f"Columns in the dataset: {df.columns.tolist()}")
-        raise e
-    return user_ids, game_ids, ratings
 
 # Naive model created using neural Collaborative Filtering
 def build_naive_model(num_users, num_games, embedding_size=50):
@@ -94,9 +90,9 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     user_vector = Flatten()(user_embedding)
     game_vector = Flatten()(game_embedding)
     
-    dot_product = Dot(axes=1)([user_vector, game_vector])
+    concatenated = Concatenate()([user_vector, game_vector])
     
-    dense_1 = Dense(512, activation='relu', kernel_regularizer='l2')(dot_product)
+    dense_1 = Dense(512, activation='relu', kernel_regularizer='l2')(concatenated)
     dropout_1 = Dropout(0.5)(dense_1)
     dense_2 = Dense(256, activation='relu', kernel_regularizer='l2')(dropout_1)
     dropout_2 = Dropout(0.5)(dense_2)
@@ -153,12 +149,12 @@ def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
 
-
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
     
     df = load_data(dataset_path)
     
+    # KNN Model
     user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
     
     train_data, test_data = train_test_split(df, test_size=0.2, random_state=42)
@@ -171,12 +167,14 @@ if __name__ == "__main__":
     knn_rmse = evaluate_knn_model(base_model, user_game_matrix_csr, test_data)
     print(f"KNN Model RMSE: {knn_rmse}")
     
+    # Neural Network Models
     user_ids, game_ids, ratings = prepare_data_for_nn(df)
     
     user_ids_train, user_ids_test, game_ids_train, game_ids_test, ratings_train, ratings_test = train_test_split(
         user_ids, game_ids, ratings, test_size=0.2, random_state=42
     )
     
+    # Naive Model
     print("Training naive model (Basic Neural Collaborative Filtering)...")
     num_users = len(np.unique(user_ids))
     num_games = len(np.unique(game_ids))
@@ -189,6 +187,7 @@ if __name__ == "__main__":
     naive_rmse = calculate_rmse(ratings_test, naive_predictions)
     print(f"Naive Neural Collaborative Filtering Model RMSE: {naive_rmse}")
     
+    # Fine-tuned Model
     print("Training fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
     
@@ -198,4 +197,3 @@ if __name__ == "__main__":
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_rmse = evaluate_nn_model(fine_tuned_model, user_ids_test, game_ids_test, ratings_test)
     print(f"Fine-Tuned Neural Collaborative Filtering Model RMSE: {fine_tuned_rmse}")
-

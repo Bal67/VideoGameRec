@@ -13,17 +13,19 @@ def load_data(dataset_path):
     df['user_id'] = df['user_id'].astype('category').cat.codes  # Ensure user_id is a category
     return df
 
-# Recommend top games based on embeddings
-def recommend_games_embedding(game_title, df, model):
-    game_ids = df['game_id'].values
-    unique_game_ids = np.unique(game_ids)
-    
-    game_id = df[df['game_title'] == game_title]['game_id'].values[0]
+# Load model and extract embeddings
+def load_model_and_embeddings(model_path):
+    model = load_model(model_path)
     game_embedding_layer = model.get_layer('game_embedding')
     game_embedding_weights = game_embedding_layer.get_weights()[0]
-    game_embedding = game_embedding_weights[game_id]
+    return model, game_embedding_weights
 
-    similarities = cosine_similarity([game_embedding], game_embedding_weights)[0]
+# Recommend top games based on embeddings
+def recommend_games_embedding(game_title, df, game_embeddings):
+    game_id = df[df['game_title'] == game_title]['game_id'].values[0]
+    game_embedding = game_embeddings[game_id]
+
+    similarities = cosine_similarity([game_embedding], game_embeddings)[0]
     similar_game_indices = similarities.argsort()[-11:][::-1]  # Get top 10 similar games
 
     top_game_ids = [idx for idx in similar_game_indices if idx != game_id]
@@ -105,13 +107,13 @@ def main():
     model_path = './models/fine_tuned_model.h5'
 
     df = load_data(dataset_path)
-    model = load_model(model_path)
+    model, game_embeddings = load_model_and_embeddings(model_path)
 
     game_title = st.selectbox("Select your favorite game", df['game_title'].unique())
 
     if st.button("Get Recommendations"):
         st.markdown("<div class='stSubtitle'>🌟 Recommendations from Fine-Tuned Neural Network Model 🌟</div>", unsafe_allow_html=True)
-        recommendations = recommend_games_embedding(game_title, df, model)
+        recommendations = recommend_games_embedding(game_title, df, game_embeddings)
         for game in recommendations:
             st.markdown(f"<div class='recommendation-item'>{game}</div>", unsafe_allow_html=True)
 
