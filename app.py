@@ -37,27 +37,65 @@ def recommend_games(game_title, item_similarity_df):
 def main():
     st.set_page_config(page_title="Game Recommendation System", page_icon="🎮")
     
-    # Custom CSS for background color and sparkles
+    # Custom CSS for a more extravagant look
     st.markdown(
         """
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+        
         .stApp {
-            background-color: pink;
-            background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
-            color: black;
+            background-color: #ff69b4;
+            background-image: url("https://www.transparenttextures.com/patterns/45-degree-fabric-dark.png");
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
         }
+        
+        .stTitle {
+            text-align: center;
+            color: #ff1493;
+            font-size: 3em;
+            text-shadow: 2px 2px #000000;
+        }
+        
         .recommendations {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             padding: 10px;
-            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.2);
+            animation: sparkle 1s infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0px 0px 25px 10px rgba(255, 255, 255, 0.6); }
+            100% { box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.2); }
+        }
+        
+        .recommendation-item {
+            font-size: 1.5em;
+            margin: 5px 0;
+            color: #ffd700;
+        }
+        
+        .stButton>button {
+            background-color: #ff1493;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        
+        .stButton>button:hover {
+            background-color: #ff69b4;
         }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    st.title("🌟 Game Recommendation System 🌟")
+    st.markdown("<h1 class='stTitle'>🌟 Game Recommendation System 🌟</h1>", unsafe_allow_html=True)
 
     dataset_path = './data/processed_data.csv'
     df = load_data(dataset_path)
@@ -72,7 +110,7 @@ def main():
         st.write("🌟 Recommendations from Item-Based Collaborative Filtering 🌟")
         recommendations = recommend_games(game_title, item_similarity_df)
         for game in recommendations:
-            st.write(game)
+            st.markdown(f"<div class='recommendation-item'>{game}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
