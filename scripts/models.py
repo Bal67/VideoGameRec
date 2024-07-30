@@ -109,7 +109,7 @@ def save_model(model, model_name, model_path='./models'):
     print(f"Model saved to {model_file}")
 
 if __name__ == "__main__":
-    dataset_path = './datasets/steam/processed_data.csv'
+    dataset_path = './data/processed_data.csv'
     
     # Load the data
     df = load_data(dataset_path)
