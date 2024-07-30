@@ -35,7 +35,29 @@ def recommend_games(game_title, item_similarity_df):
 
 # Streamlit app
 def main():
-    st.title("Game Recommendation System")
+    st.set_page_config(page_title="Game Recommendation System", page_icon="🎮")
+    
+    # Custom CSS for background color and sparkles
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: pink;
+            background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+            color: black;
+        }
+        .recommendations {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.title("🌟 Game Recommendation System 🌟")
 
     dataset_path = './data/processed_data.csv'
     df = load_data(dataset_path)
@@ -46,10 +68,12 @@ def main():
     game_title = st.selectbox("Select your favorite game", item_similarity_df.columns)
 
     if st.button("Get Recommendations"):
-        st.write("Recommendations from Item-Based Collaborative Filtering:")
+        st.markdown("<div class='recommendations'>", unsafe_allow_html=True)
+        st.write("🌟 Recommendations from Item-Based Collaborative Filtering 🌟")
         recommendations = recommend_games(game_title, item_similarity_df)
         for game in recommendations:
             st.write(game)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
