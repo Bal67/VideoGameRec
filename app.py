@@ -56,9 +56,18 @@ def main():
             font-size: 3em;
             text-shadow: 2px 2px #000000;
         }
+
+        .stSubtitle {
+            text-align: center;
+            color: #ffffff;
+            font-size: 2em;
+            text-shadow: 1px 1px #000000;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
         
         .recommendation-item {
-            font-size: 2em;
+            font-size: 1.2em;
             margin: 10px 0;
             padding: 10px;
             border-radius: 10px;
@@ -103,7 +112,7 @@ def main():
     game_title = st.selectbox("Select your favorite game", item_similarity_df.columns)
 
     if st.button("Get Recommendations"):
-        st.write("🌟 Recommendations from Item-Based Collaborative Filtering 🌟")
+        st.markdown("<div class='stSubtitle'>🌟 Recommendations from Item-Based Collaborative Filtering 🌟</div>", unsafe_allow_html=True)
         recommendations = recommend_games(game_title, item_similarity_df)
         for game in recommendations:
             st.markdown(f"<div class='recommendation-item'>{game}</div>", unsafe_allow_html=True)
