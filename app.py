@@ -101,7 +101,7 @@ def main():
         unsafe_allow_html=True
     )
 
-    st.markdown("<h1 class='stTitle'>🌟 Game Recommendation System 🌟</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='stTitle'>🌟 Game Recommendations🌟</h1>", unsafe_allow_html=True)
 
     dataset_path = './data/processed_data.csv'
     df = load_data(dataset_path)
