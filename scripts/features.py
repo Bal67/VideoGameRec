@@ -66,8 +66,26 @@ def extract_features(df):
     # Apply conditions to create ratings
     df['rating'] = np.select(condition, values)
     
+     # Add user features
+    user_features = df.groupby('user_id').agg(
+        total_games_played=('game_title', 'count'),
+        total_hours_played=('hours', 'sum'),
+        avg_user_rating=('rating', 'mean')
+    ).reset_index()
+    
+    df = df.merge(user_features, on='user_id', how='left')
+    
+    # Add game features
+    game_features = df.groupby('game_title').agg(
+        num_unique_players=('user_id', 'nunique'),
+        total_hours_played_on_game=('hours', 'sum'),
+        game_popularity=('user_id', 'count')
+    ).reset_index()
+    
+    df = df.merge(game_features, on='game_title', how='left')
+    
     # Drop the unnecessary columns
-    df = df.drop(columns=['flag', 'avg_hourplayed'])
+    df = df.drop(columns=['flag', 'avg_hourplayed', 'action'])
 
     return df
 
