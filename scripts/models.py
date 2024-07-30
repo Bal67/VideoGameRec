@@ -106,7 +106,7 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     output = Dense(1, activation='linear')(dropout_3)
     
     model = Model(inputs=[user_input, game_input], outputs=output)
-    model.compile(optimizer=Adam(learning_rate=0.0001), loss='mse')
+    model.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
     
     return model
 
