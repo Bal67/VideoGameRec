@@ -27,9 +27,9 @@ def calculate_rmse(y_true, y_pred):
     return sqrt(mean_squared_error(y_true, y_pred))
 
 # Make recommendations using KNN model
-def knn_recommend(user_id, knn_model, user_game_matrix_csr, df):
-    user_idx = df[df['user_id'] == user_id].index[0]
-    distances, indices = knn_model.kneighbors(user_game_matrix_csr[user_idx], n_neighbors=10)
+def knn_recommend(game_title, knn_model, user_game_matrix_csr, df):
+    game_idx = df[df['game_title'] == game_title].index[0]
+    distances, indices = knn_model.kneighbors(user_game_matrix_csr.T[game_idx], n_neighbors=10)
     
     recommendations = []
     for idx in indices.flatten():
@@ -38,13 +38,15 @@ def knn_recommend(user_id, knn_model, user_game_matrix_csr, df):
     return recommendations
 
 # Make recommendations using NN model
-def nn_recommend(user_id, game_id, nn_model, num_users, num_games):
-    user_array = np.array([user_id] * num_games)
-    game_array = np.arange(num_games)
-    predictions = nn_model.predict([user_array, game_array]).flatten()
+def nn_recommend(game_title, df, nn_model, num_users, num_games):
+    game_id = df[df['game_title'] == game_title].index[0]
+    user_ids = np.array([0] * num_games)
+    game_ids = np.arange(num_games)
+    predictions = nn_model.predict([user_ids, game_ids]).flatten()
     
     top_indices = predictions.argsort()[-10:][::-1]
-    return top_indices
+    top_games = df.iloc[top_indices]['game_title'].tolist()
+    return top_games
 
 # Streamlit app
 def main():
@@ -52,32 +54,36 @@ def main():
 
     dataset_path = './data/processed_data.csv'
     knn_model_path = './models/base_model_knn.pkl'
-    nn_model_path = './models/fine_tuned_model.h5'
+    naive_nn_model_path = './models/naive_model.h5'
+    fine_tuned_nn_model_path = './models/fine_tuned_model.h5'
 
     df = load_data(dataset_path)
     knn_model = load_knn_model(knn_model_path)
-    nn_model = load_nn_model(nn_model_path)
+    naive_nn_model = load_nn_model(naive_nn_model_path)
+    fine_tuned_nn_model = load_nn_model(fine_tuned_nn_model_path)
 
-    user_id = st.number_input("Enter User ID", min_value=1, max_value=df['user_id'].max())
-    recommendation_type = st.selectbox("Select Recommendation Type", ("KNN", "Neural Network"))
+    game_title = st.selectbox("Select your favorite game", df['game_title'].unique())
 
     if st.button("Get Recommendations"):
-        if recommendation_type == "KNN":
-            user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
-            recommendations = knn_recommend(user_id, knn_model, user_game_matrix_csr, df)
-            st.write("Recommended Games:")
-            for game in recommendations:
-                st.write(game)
-        else:
-            num_users = len(df['user_id'].unique())
-            num_games = len(df['game_title'].unique())
-            game_id = st.number_input("Enter Game ID", min_value=1, max_value=num_games)
-            top_games = nn_recommend(user_id, game_id, nn_model, num_users, num_games)
-            st.write("Recommended Games:")
-            for idx in top_games:
-                game = df[df['game_id'] == idx]['game_title'].values[0]
-                st.write(game)
+        # Prepare data for KNN model
+        user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
+
+        st.write("Recommendations from KNN Model:")
+        knn_recommendations = knn_recommend(game_title, knn_model, user_game_matrix_csr, df)
+        for game in knn_recommendations:
+            st.write(game)
+
+        st.write("Recommendations from Naive Neural Network Model:")
+        num_users = len(df['user_id'].unique())
+        num_games = len(df['game_title'].unique())
+        naive_nn_recommendations = nn_recommend(game_title, df, naive_nn_model, num_users, num_games)
+        for game in naive_nn_recommendations:
+            st.write(game)
+
+        st.write("Recommendations from Fine-Tuned Neural Network Model:")
+        fine_tuned_nn_recommendations = nn_recommend(game_title, df, fine_tuned_nn_model, num_users, num_games)
+        for game in fine_tuned_nn_recommendations:
+            st.write(game)
 
 if __name__ == "__main__":
     main()
-
