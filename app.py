@@ -3,7 +3,9 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix
+from tensorflow.keras.models import load_model
 
+'''
 # Load data
 def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
@@ -32,6 +34,37 @@ def recommend_games(game_title, item_similarity_df):
     similar_scores = item_similarity_df[game_title].sort_values(ascending=False)
     top_games = similar_scores.iloc[1:6].index.tolist()  # Get top 5 recommendations, exclude the game itself
     return top_games
+'''
+# Load data
+def load_data(dataset_path):
+    df = pd.read_csv(dataset_path)
+    df['game_title'] = df['game_title'].str.title()  # Capitalize first letter of each word
+    df['game_id'] = df['game_title'].astype('category').cat.codes  # Create game_id
+    df['user_id'] = df['user_id'].astype('category').cat.codes  # Ensure user_id is a category
+    return df
+
+# Prepare data for neural network model
+def prepare_data_for_nn(df):
+    user_ids = df['user_id'].astype('category').cat.codes.values
+    game_ids = df['game_title'].astype('category').cat.codes.values
+    ratings = df['rating'].values
+    return user_ids, game_ids, ratings
+
+# Recommend top games based on fine-tuned neural network model
+def recommend_games_nn(game_title, df, model, num_users, num_games):
+    game_id = df[df['game_title'] == game_title]['game_id'].values[0]
+    user_ids = np.array([0] * num_games)  # Assuming user_id 0 for recommendations
+    game_ids = np.arange(num_games)
+    predictions = model.predict([user_ids, game_ids]).flatten()
+    
+    top_indices = predictions.argsort()[-10:][::-1]  # Get top 10 recommendations
+    top_games = df.iloc[top_indices]['game_title'].unique().tolist()
+    
+    # Remove the input game and ensure diversity
+    top_games = [game for game in top_games if game != game_title]
+    return top_games[:5]  # Return top 5 diverse recommendations
+
+
 
 # Streamlit app
 def main():
