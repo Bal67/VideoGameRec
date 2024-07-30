@@ -191,7 +191,7 @@ if __name__ == "__main__":
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
     early_stopping = EarlyStopping(monitor='val_loss', patience=3)
     
-    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test))
+    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=128, validation_data=([user_ids_test, game_ids_test], ratings_test))
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
