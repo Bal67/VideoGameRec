@@ -100,4 +100,4 @@ if __name__ == "__main__":
     
     # Display the first few rows of the modified dataset
     print("Dataset after feature extraction:")
-    print(df.head(20))
+    print(df.head())
