@@ -153,6 +153,16 @@ def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
 
+# Save embeddings
+def save_embeddings(model, model_path='./models'):
+    user_embedding_matrix = model.get_layer('embedding').get_weights()[0]
+    game_embedding_matrix = model.get_layer('embedding').get_weights()[0]
+
+    np.save(os.path.join(model_path, 'user_embeddings.npy'), user_embedding_matrix)
+    np.save(os.path.join(model_path, 'game_embeddings.npy'), game_embedding_matrix)
+
+    print(f"Embeddings saved to {model_path}")
+
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
     
@@ -195,6 +205,5 @@ if __name__ == "__main__":
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
-    fine_tuned_rmse = evaluate_nn_model(fine_tuned_model, user_ids_test, game_ids_test, ratings_test)
-    print(f"Fine-Tuned Neural Collaborative Filtering Model RMSE: {fine_tuned_rmse}")
-
+    fine_tuned_rmse = evaluate_nn_model(fine_tuned_model, user_ids_test, game_ids
+    print (f"Fine-tuned Neural Collaborative Filtering Model RMSE: {fine_tuned_rmse}")

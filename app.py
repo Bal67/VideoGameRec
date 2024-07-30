@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from tensorflow.keras.models import load_model
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load data
 def load_data(dataset_path):
@@ -11,26 +12,23 @@ def load_data(dataset_path):
     df['user_id'] = df['user_id'].astype('category').cat.codes  # Ensure user_id is a category
     return df
 
-# Prepare data for neural network model
-def prepare_data_for_nn(df):
-    user_ids = df['user_id'].astype('category').cat.codes.values
-    game_ids = df['game_title'].astype('category').cat.codes.values
-    ratings = df['rating'].values
-    return user_ids, game_ids, ratings
+# Load embeddings
+def load_embeddings(model_path='./models'):
+    game_embeddings = np.load(os.path.join(model_path, 'game_embeddings.npy'))
+    return game_embeddings
 
-# Recommend top games based on fine-tuned neural network model
-def recommend_games_nn(game_title, df, model, num_users, num_games):
+# Recommend top games based on embeddings
+def recommend_games_embedding(game_title, df, game_embeddings):
     game_id = df[df['game_title'] == game_title]['game_id'].values[0]
-    user_ids = np.array([0] * num_games)  # Assuming user_id 0 for recommendations
-    game_ids = np.arange(num_games)
-    predictions = model.predict([user_ids, game_ids]).flatten()
-    
-    top_indices = predictions.argsort()[-10:][::-1]  # Get top 10 recommendations
-    top_games = df.iloc[top_indices]['game_title'].unique().tolist()
-    
-    # Remove the input game and ensure diversity
-    top_games = [game for game in top_games if game != game_title]
-    return top_games[:5]  # Return top 5 diverse recommendations
+    game_embedding = game_embeddings[game_id]
+
+    similarities = cosine_similarity([game_embedding], game_embeddings)[0]
+    similar_game_indices = similarities.argsort()[-11:][::-1]  # Get top 10 similar games
+
+    top_game_ids = [idx for idx in similar_game_indices if idx != game_id]
+    top_games = df[df['game_id'].isin(top_game_ids)]['game_title'].unique().tolist()
+
+    return top_games[:5]  # Return top 5 recommendations
 
 # Streamlit app
 def main():
@@ -103,19 +101,16 @@ def main():
     st.markdown("<h1 class='stTitle'>🌟 Game Recommendation System 🌟</h1>", unsafe_allow_html=True)
 
     dataset_path = './data/processed_data.csv'
-    fine_tuned_model_path = './models/fine_tuned_model.h5'
+    model_path = './models'
 
     df = load_data(dataset_path)
-    user_ids, game_ids, ratings = prepare_data_for_nn(df)
-    fine_tuned_model = load_model(fine_tuned_model_path)
+    game_embeddings = load_embeddings(model_path)
 
     game_title = st.selectbox("Select your favorite game", df['game_title'].unique())
 
     if st.button("Get Recommendations"):
         st.markdown("<div class='stSubtitle'>🌟 Recommendations from Fine-Tuned Neural Network Model 🌟</div>", unsafe_allow_html=True)
-        num_users = len(np.unique(user_ids))
-        num_games = len(np.unique(game_ids))
-        recommendations = recommend_games_nn(game_title, df, fine_tuned_model, num_users, num_games)
+        recommendations = recommend_games_embedding(game_title, df, game_embeddings)
         for game in recommendations:
             st.markdown(f"<div class='recommendation-item'>{game}</div>", unsafe_allow_html=True)
 
