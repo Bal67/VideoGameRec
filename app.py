@@ -5,10 +5,16 @@ import os
 from tensorflow.keras.models import load_model
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Custom title formatting function
+def custom_title_format(title):
+    words = title.split()
+    formatted_words = [word.capitalize() if word.lower() != "ii" and not word.endswith("'s") else word for word in words]
+    return ' '.join(formatted_words)
+
 # Load data
 def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
-    df['game_title'] = df['game_title'].str.title()  # Capitalize first letter of each word
+    df['game_title'] = df['game_title'].apply(custom_title_format)  # Apply custom title formatting
     df['game_id'] = df['game_title'].astype('category').cat.codes  # Create game_id
     df['user_id'] = df['user_id'].astype('category').cat.codes  # Ensure user_id is a category
     return df
