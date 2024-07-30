@@ -88,8 +88,8 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     user_input = Input(shape=(1,))
     game_input = Input(shape=(1,))
     
-    user_embedding = Embedding(num_users, embedding_size, embeddings_regularizer='l2')(user_input)
-    game_embedding = Embedding(num_games, embedding_size, embeddings_regularizer='l2')(game_input)
+    user_embedding = Embedding(num_users, embedding_size, embeddings_regularizer='l2', name='user_embedding')(user_input)
+    game_embedding = Embedding(num_games, embedding_size, embeddings_regularizer='l2', name='game_embedding')(game_input)
     
     user_vector = Flatten()(user_embedding)
     game_vector = Flatten()(game_embedding)
@@ -206,4 +206,5 @@ if __name__ == "__main__":
     
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_rmse = evaluate_nn_model(fine_tuned_model, user_ids_test, game_ids_test, ratings_test)
-    print(f"Fine-Tuned Neural Collaborative Filtering Model RMSE : {fine_tuned_rmse}")
+    print(f"Fine-Tuned Neural Collaborative Filtering Model RMSE: {fine_tuned_rmse}")
+
