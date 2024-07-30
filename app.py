@@ -37,7 +37,7 @@ def recommend_games(game_title, item_similarity_df):
 
 # Streamlit app
 def main():
-    st.set_page_config(page_title="Game Recommendation System", page_icon="🎮")
+    #st.set_page_config(page_title="Game Recommendation System", page_icon="🎮")
     
     # Custom CSS for an extravagant look
     st.markdown(
