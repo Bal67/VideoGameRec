@@ -8,11 +8,12 @@ from scipy.sparse import csr_matrix
 def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
     df['game_title'] = df['game_title'].str.title()  # Capitalize first letter of each word
+    df['game_id'] = df['game_title'].astype('category').cat.codes  # Create game_id
     return df
 
 # Create pivot table and normalize data
 def prepare_pivot_table(df):
-    pivot = df.pivot_table(index='user_id', columns='game_title', values='rating')
+    pivot = df.pivot_table(index='game_id', columns='game_title', values='rating')
     pivot = pivot.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)), axis=1)
     pivot = pivot.fillna(0)
     pivot = pivot.T
@@ -27,11 +28,11 @@ def compute_similarity(pivot):
     return item_similarity_df
 
 # Recommend top games based on similarity
-def recommend_games(game_title, item_similarity_df, pivot):
-    if game_title not in item_similarity_df.columns:
-        return ["No data available for this game"]
-    similar_scores = item_similarity_df[game_title].sort_values(ascending=False)
-    top_games = similar_scores.iloc[1:11].index.tolist()  # Exclude the game itself
+def recommend_games(game_title, item_similarity_df, df):
+    game_id = df[df['game_title'] == game_title]['game_id'].values[0]
+    similar_scores = item_similarity_df.loc[game_id].sort_values(ascending=False)
+    top_game_ids = similar_scores.iloc[1:11].index.tolist()  # Exclude the game itself
+    top_games = df[df['game_id'].isin(top_game_ids)]['game_title'].unique().tolist()
     return top_games
 
 # Streamlit app
@@ -48,7 +49,7 @@ def main():
 
     if st.button("Get Recommendations"):
         st.write("Recommendations from Item-Based Collaborative Filtering:")
-        recommendations = recommend_games(game_title, item_similarity_df, pivot)
+        recommendations = recommend_games(game_title, item_similarity_df, df)
         for game in recommendations:
             st.write(game)
 
