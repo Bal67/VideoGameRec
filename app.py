@@ -12,7 +12,7 @@ def load_data(dataset_path):
 
 # Create pivot table and normalize data
 def prepare_pivot_table(df):
-    pivot = df.pivot_table(index='game_id', columns='game_title', values='rating')
+    pivot = df.pivot_table(index='user_id', columns='game_title', values='rating')
     pivot = pivot.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)), axis=1)
     pivot = pivot.fillna(0)
     pivot = pivot.T
