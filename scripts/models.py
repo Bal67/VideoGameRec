@@ -18,17 +18,6 @@ def load_data(dataset_path):
     return df
 
 def prepare_data_for_knn(df):
-    """
-    Prepare the data for training the KNN model.
-    
-    Args:
-        df (pd.DataFrame): Dataframe containing user-item interactions and ratings.
-    
-    Returns:
-        csr_matrix: User-item interaction matrix in CSR format.
-        list: List of user IDs.
-        list: List of game titles.
-    """
     try:
         # Aggregate ratings by taking the mean for each user-game combination
         df = df.groupby(['user_id', 'game_title']).rating.mean().reset_index()
@@ -104,7 +93,7 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     output = Dense(1, activation='linear')(dropout_2)
     
     model = Model(inputs=[user_input, game_input], outputs=output)
-    model.compile(optimizer=Adam(lr=0.0001), loss='mse')
+    model.compile(optimizer=Adam(lr=0.001), loss='mse')
     
     return model
 
