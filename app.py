@@ -57,22 +57,8 @@ def main():
             text-shadow: 2px 2px #000000;
         }
         
-        .recommendations {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 10px;
-            box-shadow: 0px 0px 15px 5px rgba(255, 105, 180, 0.6);
-            animation: sparkle 1s infinite;
-        }
-        
-        @keyframes sparkle {
-            0% { box-shadow: 0px 0px 15px 5px rgba(255, 105, 180, 0.6); }
-            50% { box-shadow: 0px 0px 25px 10px rgba(255, 255, 255, 0.8); }
-            100% { box-shadow: 0px 0px 15px 5px rgba(255, 105, 180, 0.6); }
-        }
-        
         .recommendation-item {
-            font-size: 1.5em;
+            font-size: 2em;
             margin: 10px 0;
             padding: 10px;
             border-radius: 10px;
@@ -117,12 +103,10 @@ def main():
     game_title = st.selectbox("Select your favorite game", item_similarity_df.columns)
 
     if st.button("Get Recommendations"):
-        st.markdown("<div class='recommendations'>", unsafe_allow_html=True)
         st.write("🌟 Recommendations from Item-Based Collaborative Filtering 🌟")
         recommendations = recommend_games(game_title, item_similarity_df)
         for game in recommendations:
             st.markdown(f"<div class='recommendation-item'>{game}</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
