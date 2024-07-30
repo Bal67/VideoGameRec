@@ -30,7 +30,7 @@ def recommend_games(game_title, item_similarity_df):
     if game_title not in item_similarity_df.columns:
         return ["No data available for this game"]
     similar_scores = item_similarity_df[game_title].sort_values(ascending=False)
-    top_games = similar_scores.iloc[1:11].index.tolist()  # Exclude the game itself
+    top_games = similar_scores.iloc[1:6].index.tolist()  # Get top 5 recommendations, exclude the game itself
     return top_games
 
 # Streamlit app
