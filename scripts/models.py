@@ -205,5 +205,5 @@ if __name__ == "__main__":
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
-    fine_tuned_rmse = evaluate_nn_model(fine_tuned_model, user_ids_test, game_ids
+    fine_tuned_rmse = evaluate_nn_model(fine_tuned_model, user_ids_test, game_ids_test, ratings_test)
     print (f"Fine-tuned Neural Collaborative Filtering Model RMSE: {fine_tuned_rmse}")
