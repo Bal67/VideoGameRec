@@ -212,7 +212,7 @@ if __name__ == "__main__":
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
     early_stopping = EarlyStopping(monitor='val_loss', patience=3)
     
-    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=30, batch_size=128, validation_data=([user_ids_test, game_ids_test], ratings_test), callbacks=[early_stopping])
+    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=25, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test), callbacks=[early_stopping])
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
     # Evaluate fine-tuned model
