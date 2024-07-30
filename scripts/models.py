@@ -97,14 +97,16 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     
     dot_product = Dot(axes=1)([user_vector, game_vector])
     
-    dense_1 = Dense(128, activation='relu')(dot_product)
-    dropout_1 = Dropout(0.5)(dense_1)
-    dense_2 = Dense(64, activation='relu')(dropout_1)
-    dropout_2 = Dropout(0.5)(dense_2)
-    output = Dense(1, activation='linear')(dropout_2)
+    dense_1 = Dense(256, activation='relu')(dot_product)
+    dropout_1 = Dropout(0.4)(dense_1)
+    dense_2 = Dense(128, activation='relu')(dropout_1)
+    dropout_2 = Dropout(0.4)(dense_2)
+    dense_3 = Dense(64, activation='relu')(dropout_2)
+    dropout_3 = Dropout(0.4)(dense_3)
+    output = Dense(1, activation='linear')(dropout_3)
     
     model = Model(inputs=[user_input, game_input], outputs=output)
-    model.compile(optimizer=Adam(lr=0.001), loss='mse')
+    model.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
     
     return model
 
@@ -135,7 +137,6 @@ def evaluate_knn_model(knn, user_game_matrix_csr, test_data):
     game_indices = test_data['game_idx'].values
     true_ratings = test_data['rating'].values
     
-    # Predict ratings
     distances, indices = knn.kneighbors(user_game_matrix_csr[user_indices])
     predicted_ratings = []
     for i in range(len(user_indices)):
@@ -147,18 +148,6 @@ def evaluate_knn_model(knn, user_game_matrix_csr, test_data):
     return calculate_rmse(true_ratings, np.array(predicted_ratings))
 
 def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
-    """
-    Evaluate the neural network model.
-    
-    Args:
-        model (Model): Trained neural network model.
-        user_ids_test (np.array): Test user IDs.
-        game_ids_test (np.array): Test game IDs.
-        ratings_test (np.array): True ratings.
-    
-    Returns:
-        float: RMSE value.
-    """
     predictions = model.predict([user_ids_test, game_ids_test]).flatten()
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
@@ -166,34 +155,26 @@ def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
     
-    # Load the data
     df = load_data(dataset_path)
     
-    # Prepare data for base model
     user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
     
-    # Split the data into training and test sets
     train_data, test_data = train_test_split(df, test_size=0.2, random_state=42)
     
-    # Train base model
     print("Training base model (KNN)...")
     base_model = train_base_model(user_game_matrix_csr)
     save_model(base_model, 'base_model_knn.pkl')
     
-    # Evaluate base model
     print("Evaluating base model (KNN)...")
     knn_rmse = evaluate_knn_model(base_model, user_game_matrix_csr, test_data)
     print(f"KNN Model RMSE: {knn_rmse}")
     
-    # Prepare data for neural network models
     user_ids, game_ids, ratings = prepare_data_for_nn(df)
     
-    # Split the data into training and test sets
     user_ids_train, user_ids_test, game_ids_train, game_ids_test, ratings_train, ratings_test = train_test_split(
         user_ids, game_ids, ratings, test_size=0.2, random_state=42
     )
     
-    # Train naive model
     print("Training naive model (Basic Neural Collaborative Filtering)...")
     num_users = len(np.unique(user_ids))
     num_games = len(np.unique(game_ids))
@@ -202,12 +183,10 @@ if __name__ == "__main__":
     naive_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=5, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test))
     save_model(naive_model, 'naive_model.h5')
     
-    # Evaluate naive model - RMSE
     naive_predictions = naive_model.predict([user_ids_test, game_ids_test]).flatten()
     naive_rmse = calculate_rmse(ratings_test, naive_predictions)
     print(f"Naive Neural Collaborative Filtering Model RMSE: {naive_rmse}")
     
-    # Train fine-tuned model
     print("Training fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
     early_stopping = EarlyStopping(monitor='val_loss', patience=3)
@@ -215,7 +194,6 @@ if __name__ == "__main__":
     fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test), callbacks=[early_stopping])
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
-    # Evaluate fine-tuned model
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_rmse = evaluate_nn_model(fine_tuned_model, user_ids_test, game_ids_test, ratings_test)
     print(f"Fine-Tuned Neural Collaborative Filtering Model RMSE: {fine_tuned_rmse}")
