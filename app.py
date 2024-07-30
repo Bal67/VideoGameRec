@@ -14,9 +14,8 @@ def load_data(dataset_path):
 # Create pivot table and normalize data
 def prepare_pivot_table(df):
     pivot = df.pivot_table(index='game_id', columns='game_title', values='rating')
-    pivot = pivot.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)), axis=1)
-    pivot = pivot.fillna(0)
-    pivot = pivot.T
+    pivot = pivot.fillna(0)  # Fill NaN values with 0
+    pivot = pivot.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)) if (np.max(x) - np.min(x)) != 0 else x, axis=1)
     pivot = pivot.loc[:, (pivot != 0).any(axis=0)]
     return pivot
 
