@@ -18,6 +18,17 @@ def load_data(dataset_path):
     return df
 
 def prepare_data_for_knn(df):
+    """
+    Prepare the data for training the KNN model.
+    
+    Args:
+        df (pd.DataFrame): Dataframe containing user-item interactions and ratings.
+    
+    Returns:
+        csr_matrix: User-item interaction matrix in CSR format.
+        list: List of user IDs.
+        list: List of game titles.
+    """
     try:
         # Aggregate ratings by taking the mean for each user-game combination
         df = df.groupby(['user_id', 'game_title']).rating.mean().reset_index()
@@ -97,8 +108,6 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     
     return model
 
-
-
 # Save model to desired path
 def save_model(model, model_name, model_path='./models'):
     if not os.path.exists(model_path):
@@ -138,12 +147,21 @@ def evaluate_knn_model(knn, user_game_matrix_csr, test_data):
     return calculate_rmse(true_ratings, np.array(predicted_ratings))
 
 def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
+    """
+    Evaluate the neural network model.
+    
+    Args:
+        model (Model): Trained neural network model.
+        user_ids_test (np.array): Test user IDs.
+        game_ids_test (np.array): Test game IDs.
+        ratings_test (np.array): True ratings.
+    
+    Returns:
+        float: RMSE value.
+    """
     predictions = model.predict([user_ids_test, game_ids_test]).flatten()
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
-
-
-
 
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
