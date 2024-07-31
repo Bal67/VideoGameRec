@@ -29,5 +29,3 @@ if __name__ == "__main__":
     download_dataset(url, download_path, dataset_file)
     df = load_dataset(dataset_path)
     
-    # Display the first few rows of the dataset
-    print(df.head())

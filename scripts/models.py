@@ -16,7 +16,7 @@ def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
     return df
 
-#Prepare dataset for KNN
+# Prepare dataset for KNN
 def prepare_data_for_knn(df):
     try:
         # Aggregate ratings by taking the mean for each user-game combination
@@ -36,7 +36,6 @@ def prepare_data_for_knn(df):
     user_game_matrix_csr = csr_matrix(user_game_matrix.values)
     
     return user_game_matrix_csr, user_ids, game_titles
-
 
 def prepare_data_for_nn(df):
     user_ids = df['user_id'].astype('category').cat.codes.values
@@ -113,8 +112,7 @@ def save_model(model, model_name, model_path='./models'):
         
     print(f"Model saved to {model_file}")
 
-
-#Calculate RMSE for model evaluation
+# Calculate RMSE for model evaluation
 def calculate_rmse(y_true, y_pred):
     return sqrt(mean_squared_error(y_true, y_pred))
 
@@ -142,9 +140,6 @@ def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
 
-
-
-#Run main function
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
     
@@ -153,7 +148,8 @@ if __name__ == "__main__":
     # KNN Model
     user_game_matrix_csr, user_ids, game_titles = prepare_data_for_knn(df)
     
-    train_data, test_data = train_test_split(df, test_size=0.2, random_state=42)
+    train_data, temp_data = train_test_split(df, test_size=0.4, random_state=42)
+    val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
     
     print("Training base model (KNN)...")
     base_model = train_base_model(user_game_matrix_csr)
@@ -166,8 +162,11 @@ if __name__ == "__main__":
     # Neural Network Models
     user_ids, game_ids, ratings = prepare_data_for_nn(df)
     
-    user_ids_train, user_ids_test, game_ids_train, game_ids_test, ratings_train, ratings_test = train_test_split(
-        user_ids, game_ids, ratings, test_size=0.2, random_state=42
+    user_ids_train, user_ids_temp, game_ids_train, game_ids_temp, ratings_train, ratings_temp = train_test_split(
+        user_ids, game_ids, ratings, test_size=0.4, random_state=42
+    )
+    user_ids_val, user_ids_test, game_ids_val, game_ids_test, ratings_val, ratings_test = train_test_split(
+        user_ids_temp, game_ids_temp, ratings_temp, test_size=0.5, random_state=42
     )
     
     # Naive Model
@@ -176,7 +175,7 @@ if __name__ == "__main__":
     num_games = len(np.unique(game_ids))
     
     naive_model = build_naive_model(num_users, num_games)
-    naive_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=5, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test))
+    naive_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=5, batch_size=64, validation_data=([user_ids_val, game_ids_val], ratings_val))
     save_model(naive_model, 'naive_model.h5')
     
     naive_predictions = naive_model.predict([user_ids_test, game_ids_test]).flatten()
@@ -187,7 +186,7 @@ if __name__ == "__main__":
     print("Training fine-tuned model (Enhanced Neural Collaborative Filtering)...")
     fine_tuned_model = build_fine_tuned_model(num_users, num_games)
     
-    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=64, validation_data=([user_ids_test, game_ids_test], ratings_test))
+    fine_tuned_model.fit([user_ids_train, game_ids_train], ratings_train, epochs=20, batch_size=64, validation_data=([user_ids_val, game_ids_val], ratings_val))
     save_model(fine_tuned_model, 'fine_tuned_model.h5')
     
     print("Evaluating fine-tuned model (Enhanced Neural Collaborative Filtering)...")
