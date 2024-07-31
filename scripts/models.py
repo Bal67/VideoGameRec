@@ -65,7 +65,7 @@ def build_naive_model(num_users, num_games, embedding_size=50):
     output = Dense(1, activation='linear')(dot_product)
     
     model = Model(inputs=[user_input, game_input], outputs=output)
-    model.compile(optimizer='adam', loss='mse')
+    model.compile(optimizer='adam', loss='mean_squared_error')
     
     return model
 
@@ -93,7 +93,7 @@ def build_fine_tuned_model(num_users, num_games, embedding_size=50):
     output = Dense(1, activation='linear')(dropout_4)
     
     model = Model(inputs=[user_input, game_input], outputs=output)
-    model.compile(optimizer=Adam(learning_rate=0.0005), loss='mse')
+    model.compile(optimizer=Adam(learning_rate=0.0005), loss='mean_squared_error')
     
     return model
 
