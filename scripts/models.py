@@ -16,18 +16,8 @@ def load_data(dataset_path):
     df = pd.read_csv(dataset_path)
     return df
 
+#Prepare dataset for KNN
 def prepare_data_for_knn(df):
-    """
-    Prepare the data for training the KNN model.
-    
-    Args:
-        df (pd.DataFrame): Dataframe containing user-item interactions and ratings.
-    
-    Returns:
-        csr_matrix: User-item interaction matrix in CSR format.
-        list: List of user IDs.
-        list: List of game titles.
-    """
     try:
         # Aggregate ratings by taking the mean for each user-game combination
         df = df.groupby(['user_id', 'game_title']).rating.mean().reset_index()
@@ -46,6 +36,7 @@ def prepare_data_for_knn(df):
     user_game_matrix_csr = csr_matrix(user_game_matrix.values)
     
     return user_game_matrix_csr, user_ids, game_titles
+
 
 def prepare_data_for_nn(df):
     user_ids = df['user_id'].astype('category').cat.codes.values
@@ -122,6 +113,8 @@ def save_model(model, model_name, model_path='./models'):
         
     print(f"Model saved to {model_file}")
 
+
+#Calculate RMSE for model evaluation
 def calculate_rmse(y_true, y_pred):
     return sqrt(mean_squared_error(y_true, y_pred))
 
@@ -149,6 +142,9 @@ def evaluate_nn_model(model, user_ids_test, game_ids_test, ratings_test):
     rmse = calculate_rmse(ratings_test, predictions)
     return rmse
 
+
+
+#Run main function
 if __name__ == "__main__":
     dataset_path = './data/processed_data.csv'
     

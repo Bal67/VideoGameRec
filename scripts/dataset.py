@@ -3,14 +3,6 @@ import pandas as pd
 import requests
 
 def download_dataset(url, download_path='./datasets/steam', dataset_file='steam-200k.csv'):
-    """
-    Downloads the dataset from the specified URL.
-    
-    Args:
-        url (str): URL of the dataset.
-        download_path (str): Path to download the dataset to.
-        dataset_file (str): Filename of the dataset to save as.
-    """
     # Ensure the download path exists
     if not os.path.exists(download_path):
         os.makedirs(download_path)
@@ -23,16 +15,8 @@ def download_dataset(url, download_path='./datasets/steam', dataset_file='steam-
         file.write(response.content)
     print(f"Dataset downloaded from {url} to {dataset_path}")
 
+#Loads dataset into Pandas dataframe
 def load_dataset(dataset_path):
-    """
-    Loads the dataset into a pandas DataFrame.
-    
-    Args:
-        dataset_path (str): Path to the dataset file (e.g., './datasets/steam/steam-200k.csv').
-        
-    Returns:
-        pd.DataFrame: Loaded dataset.
-    """
     df = pd.read_csv(dataset_path)
     return df
 

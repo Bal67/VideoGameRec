@@ -37,7 +37,7 @@ def recommend_games_embedding(game_title, df, game_embeddings):
 def main():
     st.set_page_config(page_title="Game Recommendation System", page_icon="🎮")
     
-    # Custom CSS for an extravagant look
+    #CSS for Pink Look :)
     st.markdown(
         """
         <style>
@@ -116,6 +116,8 @@ def main():
         recommendations = recommend_games_embedding(game_title, df, game_embeddings)
         for game in recommendations:
             st.markdown(f"<div class='recommendation-item'>{game}</div>", unsafe_allow_html=True)
+
+
 
 if __name__ == "__main__":
     main()

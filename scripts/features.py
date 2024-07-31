@@ -2,16 +2,9 @@ import os
 import pandas as pd
 import numpy as np
 
+
+#Loads dataset into Pandas dataframe
 def load_dataset(dataset_path):
-    """
-    Loads the dataset into a pandas DataFrame and renumbers the rows.
-    
-    Args:
-        dataset_path (str): Path to the dataset file (e.g., './datasets/steam/steam-200k.csv').
-        
-    Returns:
-        pd.DataFrame: Loaded and renumbered dataset.
-    """
     # Load the dataset
     df = pd.read_csv(dataset_path)
     
@@ -20,16 +13,9 @@ def load_dataset(dataset_path):
     
     return df
 
+
+#Extracts relevant features from the dataset and returns a new dataframe
 def extract_features(df):
-    """
-    Extracts relevant features from the dataset and converts hours to ratings.
-    
-    Args:
-        df (pd.DataFrame): The loaded dataset.
-        
-    Returns:
-        pd.DataFrame: The dataset with extracted features and converted ratings.
-    """
     # Rename columns for clarity
     df.columns = ['user_id', 'game_title', 'action', 'hours', 'flag']
     
@@ -89,6 +75,10 @@ def extract_features(df):
 
     return df
 
+
+
+
+# Save processed dataset
 if __name__ == "__main__":
     dataset_path = './datasets/steam/steam-200k.csv'
     
