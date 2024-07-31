@@ -1,24 +1,24 @@
 # VideoGameRec
 
-Google Colab: Google Colab Link
+Google Colab: https://colab.research.google.com/drive/1l9dR4gdm-N6baCLi6J4YWkPsyECgfi9c?usp=sharing
 
-Kaggle Dataset: Kaggle Dataset
+Kaggle Dataset: https://www.kaggle.com/datasets/tamber/steam-video-games/data
 
-Youtube Link: Youtube Link
+Youtube Link: https://youtu.be/s38GLBvvm2w
 
-This project recommends video games based on user interactions with games. The models used are a fine-tuned Neural Collaborative Filtering (NCF) model, a non-fine-tuned NCF model, and a KNN basic model.
+This project recommends video games based on user interactions with games and selected games (not tailored toward the user). The models used are a fine-tuned Neural Collaborative Filtering (NCF) model, a non-fine-tuned NCF model, and a KNN basic model.
 
 ## Table of Contents
 
--Setup
+- [Setup](#setup)
 
--Main
+- [Main](#main)
 
--scripts
+- [scripts](#scripts)
 
--models
+- [models](#models)
 
--data
+- [data](#data)
 
 ## Project Structure
 setup.py: Script for setting up the environment
@@ -43,7 +43,7 @@ README.md
 
 
 ## Usage
-Proceed to the Google Colab page that is linked at the top of this README.md. Once at the page, mount to your own Google Drive and follow the instructions for each cell in the Google Colab notebook.
+Proceed to the Google Colab page that is linked at the top of this README.md. Once on the page, mount it to your own Google Drive and follow the instructions for each cell in the Google Colab notebook.
 
 Replace all constants in the code (or anywhere where you see a pathway) with the pathway to your local Google Drive folder/Google Drive pathway.
 
