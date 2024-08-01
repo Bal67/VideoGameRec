@@ -93,7 +93,9 @@ Fine-Tuned NCF Model: Fine-tuned Neural Collaborative Filtering model with hyper
   
 ## Results and Conclusions
 KNN Model RMSE: ~3.3
+
 Naive Neural Collaborative Filtering Model RMSE: ~1.8
+
 Fine-Tuned Neural Collaborative Filtering Model RMSE: ~1.6
 
 The project demonstrates that both naive and fine-tuned NCF models can provide accurate game recommendations, with the fine-tuned model showing significant improvements in performance. The KNN model serves as a good baseline but is outperformed by the NCF models in capturing complex user-game interactions.
