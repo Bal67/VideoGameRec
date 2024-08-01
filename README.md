@@ -51,11 +51,11 @@ For the Streamlit application: Google Colab has a hard time opening Streamlit ap
 
 # Model Evaluation
 
-##Evaluation Process and Metric Selection
+## Evaluation Process and Metric Selection
 
 The evaluation process involves splitting the data into training, validation, and testing sets (60-20-20), training the models, and then evaluating their performance on the test set. The primary metric used for evaluation is RMSE (Root Mean Square Error), which measures the differences between predicted and actual ratings. 
 
-##Data Processing Pipeline
+## Data Processing Pipeline
 
 Data Loading: Data is loaded into the script in CSV format.
 
