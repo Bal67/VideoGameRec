@@ -6,7 +6,7 @@ Kaggle Dataset: https://www.kaggle.com/datasets/tamber/steam-video-games/data
 
 Youtube Link: https://youtu.be/6fKk6E7ADhg
 
-This project recommends video games based on user interactions with games and selected games (not tailored toward the user). The models used are a fine-tuned Neural Collaborative Filtering (NCF) model, a non-fine-tuned NCF model, and a KNN basic model.
+This project recommends video games based on user interactions with games (not tailored toward a specific user ID). The models used are a fine-tuned Neural Collaborative Filtering (NCF) model, a non-fine-tuned NCF model, and a KNN basic model.
 
 ## Table of Contents
 
