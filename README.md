@@ -4,7 +4,7 @@ Google Colab: https://colab.research.google.com/drive/1l9dR4gdm-N6baCLi6J4YWkPsy
 
 Kaggle Dataset: https://www.kaggle.com/datasets/tamber/steam-video-games/data
 
-Youtube Link: https://youtu.be/s38GLBvvm2w
+Youtube Link: https://youtu.be/6fKk6E7ADhg
 
 This project recommends video games based on user interactions with games and selected games (not tailored toward the user). The models used are a fine-tuned Neural Collaborative Filtering (NCF) model, a non-fine-tuned NCF model, and a KNN basic model.
 
